@@ -32,17 +32,9 @@
 #include "foundation/PxThread.h"
 
 #include <math.h>
-#if !PX_APPLE_FAMILY && !defined(__CYGWIN__) && !PX_EMSCRIPTEN
-#include <bits/local_lim.h> // PTHREAD_STACK_MIN
-#endif
 #include <stdio.h>
 #include <pthread.h>
 #include <unistd.h>
-#include <sys/syscall.h>
-#if !PX_APPLE_FAMILY && !PX_EMSCRIPTEN
-#include <asm/unistd.h>
-#include <sys/resource.h>
-#endif
 
 #if PX_APPLE_FAMILY
 #include <sys/types.h>
@@ -50,6 +42,8 @@
 #include <TargetConditionals.h>
 #include <pthread.h>
 #endif
+
+#include <thread>
 
 #define PxSpinLockPause() asm("nop")
 
@@ -76,7 +70,6 @@ class ThreadImpl
 	volatile int32_t state;
 
 	pthread_t thread;
-	pid_t tid;
 
 	uint32_t affinityMask;
 	const char* name;
@@ -96,7 +89,6 @@ static void setTid(ThreadImpl& threadImpl)
 #elif PX_EMSCRIPTEN
 	threadImpl.tid = pthread_self();
 #else
-	threadImpl.tid = syscall(__NR_gettid);
 #endif
 
 	// notify/unblock parent thread
@@ -133,7 +125,6 @@ PxThreadImpl::Id PxThreadImpl::getId()
 PxThreadImpl::PxThreadImpl()
 {
 	getThread(this)->thread = 0;
-	getThread(this)->tid = 0;
 	getThread(this)->state = ePxThreadNotStarted;
 	getThread(this)->quitNow = 0;
 	getThread(this)->threadStarted = 0;
@@ -146,7 +137,6 @@ PxThreadImpl::PxThreadImpl()
 PxThreadImpl::PxThreadImpl(PxThreadImpl::ExecuteFn fn, void* arg, const char* name)
 {
 	getThread(this)->thread = 0;
-	getThread(this)->tid = 0;
 	getThread(this)->state = ePxThreadNotStarted;
 	getThread(this)->quitNow = 0;
 	getThread(this)->threadStarted = 0;
@@ -251,13 +241,7 @@ void PxThreadImpl::kill()
 
 void PxThreadImpl::sleep(uint32_t ms)
 {
-	timespec sleepTime;
-	uint32_t remainder = ms % 1000;
-	sleepTime.tv_sec = ms - remainder;
-	sleepTime.tv_nsec = remainder * 1000000L;
-
-	while(nanosleep(&sleepTime, &sleepTime) == -1)
-		continue;
+	std::this_thread::sleep_for(std::chrono::milliseconds(ms));
 }
 
 void PxThreadImpl::yield()
@@ -288,7 +272,7 @@ uint32_t PxThreadImpl::setAffinityMask(uint32_t mask)
 	{
 #if PX_EMSCRIPTEN
 		// not supported
-#elif !PX_APPLE_FAMILY // Apple doesn't support syscall with getaffinity and setaffinity
+#elif 0
 		int32_t errGet = syscall(__NR_sched_getaffinity, getThread(this)->tid, sizeof(prevMask), &prevMask);
 		if(errGet < 0)
 			return 0;
@@ -389,7 +373,7 @@ uint32_t PxThreadImpl::getNbPhysicalCores()
 	int count;
 	size_t size = sizeof(count);
 	return sysctlbyname("hw.physicalcpu", &count, &size, NULL, 0) ? 0 : count;
-#else
+#elif 0
 	// Linux exposes CPU topology using /sys/devices/system/cpu
 	// https://www.kernel.org/doc/Documentation/cputopology.txt
 	if(FILE* f = fopen("/sys/devices/system/cpu/possible", "r"))
@@ -411,6 +395,8 @@ uint32_t PxThreadImpl::getNbPhysicalCores()
 		return 0;
 	else
 		return n;
+#else
+	return std::thread::hardware_concurrency();
 #endif
 }
 

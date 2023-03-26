@@ -27,6 +27,24 @@
 // Copyright (c) 2001-2004 NovodeX AG. All rights reserved.
 #include "foundation/PxFPU.h"
 
+physx::PxFPUGuard::PxFPUGuard()
+{
+}
+
+physx::PxFPUGuard::~PxFPUGuard()
+{
+}
+
+PX_FOUNDATION_API void physx::PxEnableFPExceptions()
+{
+}
+
+PX_FOUNDATION_API void physx::PxDisableFPExceptions()
+{
+}
+
+#if 0
+
 #if !defined(__CYGWIN__)
 #include <fenv.h>
 PX_COMPILE_TIME_ASSERT(8 * sizeof(uint32_t) >= sizeof(fenv_t));
@@ -105,3 +123,5 @@ PX_FOUNDATION_API void physx::PxDisableFPExceptions()
 	_mm_setcsr(control | _MM_MASK_MASK);
 #endif
 }
+
+#endif

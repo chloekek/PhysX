@@ -43,7 +43,7 @@ namespace aos
 #endif
 #endif
 
-#define PX_GLOBALCONST extern const __attribute__((weak))
+#define PX_GLOBALCONST static const
 
 PX_ALIGN_PREFIX(16)
 struct PX_VECTORF32

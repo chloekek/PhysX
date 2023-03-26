@@ -31,7 +31,7 @@
 
 #include <stddef.h>
 #if !defined(PX_GENERATE_META_DATA)
-#include <ciso646>  
+#include <ciso646>
 #endif
 /** \addtogroup foundation
   @{
@@ -75,13 +75,13 @@ Compiler defines, see http://sourceforge.net/p/predef/wiki/Compilers/
 #endif
 #elif defined(__clang__)
 #define PX_CLANG 1
-	#if defined (__clang_major__) 
+	#if defined (__clang_major__)
 		#define PX_CLANG_MAJOR __clang_major__
 	#elif defined (_clang_major)
 		#define PX_CLANG_MAJOR _clang_major
 	#else
 		#define PX_CLANG_MAJOR 0
-	#endif	
+	#endif
 #elif defined(__GNUC__) // note: __clang__ implies __GNUC__
 	#define PX_GCC 1
 #else
@@ -91,7 +91,9 @@ Compiler defines, see http://sourceforge.net/p/predef/wiki/Compilers/
 /**
 Operating system defines, see http://sourceforge.net/p/predef/wiki/OperatingSystems/
 */
-#if defined(_WIN64)
+#if 1
+	#define PX_LINUX 1
+#elif defined(_WIN64)
 	#define PX_WIN64 1
 #elif defined(_WIN32) // note: _M_PPC implies _WIN32
 	#define PX_WIN32 1
@@ -217,8 +219,8 @@ family shortcuts
 // compiler
 #define PX_GCC_FAMILY (PX_CLANG || PX_GCC)
 // os
-#define PX_WINDOWS_FAMILY (PX_WIN32 || PX_WIN64)
-#define PX_LINUX_FAMILY PX_LINUX
+#define PX_WINDOWS_FAMILY 0
+#define PX_LINUX_FAMILY 1
 #define PX_APPLE_FAMILY PX_OSX                              // equivalent to #if __APPLE__
 #define PX_UNIX_FAMILY (PX_LINUX_FAMILY || PX_APPLE_FAMILY) // shortcut for unix/posix platforms
 #if defined(__EMSCRIPTEN__)
