@@ -31,10 +31,10 @@
 
 #include "foundation/PxPreprocessor.h"
 
-#if PX_WINDOWS
+#if PX_WINDOWS && !defined(__clang__)
 #include "windows/PxWindowsTrigConstants.h"
 #include "windows/PxWindowsInlineAoS.h"
-#elif(PX_UNIX_FAMILY || PX_SWITCH)
+#elif(PX_UNIX_FAMILY || PX_SWITCH || defined(__clang__))
 #include "unix/PxUnixTrigConstants.h"
 #include "unix/PxUnixInlineAoS.h"
 #else

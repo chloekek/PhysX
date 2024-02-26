@@ -31,9 +31,9 @@
 
 #include "foundation/Px.h"
 
-#if PX_WINDOWS && !PX_NEON
+#if PX_WINDOWS && !PX_NEON && !defined(__clang__)
 #include "windows/PxWindowsAoS.h"
-#elif(PX_UNIX_FAMILY || PX_SWITCH)
+#elif(PX_UNIX_FAMILY || PX_SWITCH || defined(__clang__))
 #include "unix/PxUnixAoS.h"
 #else
 #error "Platform not supported!"
